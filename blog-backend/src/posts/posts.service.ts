@@ -32,7 +32,7 @@ export class PostsService {
   ): Promise<PostEntity> {
     const post = await this.postsRepository.findOneBy({ id });
     if (!post) {
-      throw new Error('Category not found');
+      throw new Error('Post not found');
     }
     Object.assign(post, updatePostDto);
     return this.postsRepository.save(post);
