@@ -7,9 +7,15 @@ import {
   Param,
   Body,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+
 import { UsersService } from './users.service';
 import { User } from './user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
 
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -17,14 +23,26 @@ export class UsersController {
   // ...
 
   @Post()
-  create(@Body() createUserDto: Partial<User>): Promise<User> {
+  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
+    // Hash the password using bcrypt with increased salt rounds
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(
+      createUserDto.password,
+      saltRounds,
+    );
+    //TODO: validate user email & password & check existed username
+    const user = new User();
+    user.email = createUserDto.email;
+    user.username = createUserDto.username;
+    user.password_hash = hashedPassword;
+
     return this.usersService.create(createUserDto);
   }
 
   @Put(':id')
   update(
     @Param('id') id: string,
-    @Body() updateUserDto: Partial<User>,
+    @Body() updateUserDto: UpdateUserDto,
   ): Promise<User> {
     return this.usersService.update(Number(id), updateUserDto);
   }

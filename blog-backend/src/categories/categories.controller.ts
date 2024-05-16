@@ -9,7 +9,11 @@ import {
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { Category } from './category.entity';
+import { ApiTags } from '@nestjs/swagger';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
+@ApiTags('categories')
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
@@ -17,14 +21,14 @@ export class CategoriesController {
   // ...
 
   @Post()
-  create(@Body() createCategoryDto: Partial<Category>): Promise<Category> {
+  create(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
     return this.categoriesService.create(createCategoryDto);
   }
 
   @Put(':id')
   update(
     @Param('id') id: string,
-    @Body() updateCategoryDto: Partial<Category>,
+    @Body() updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
     return this.categoriesService.update(Number(id), updateCategoryDto);
   }
