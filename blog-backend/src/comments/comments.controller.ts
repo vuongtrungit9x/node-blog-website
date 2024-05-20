@@ -6,6 +6,9 @@ import {
   Get,
   Param,
   Body,
+  UseFilters,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { UsersService } from '../users/users.service';
@@ -13,6 +16,7 @@ import { PostsService } from '../posts/posts.service';
 import { Comment } from './comment.entity';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { HttpExceptionFilter } from 'src/http-exception.filter';
 
 @ApiTags('comments')
 @Controller('comments')
@@ -26,11 +30,24 @@ export class CommentsController {
   // ...
 
   @Post()
+  @UseFilters(HttpExceptionFilter)
   async create(@Body() createCommentDto: CreateCommentDto): Promise<Comment> {
     const { userId, postId, content } = createCommentDto;
     const user = await this.usersService.findOne(userId);
+    if (!user) {
+      throw new HttpException(
+        'Bad Request, user not found',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     // TODO: add try catch & check not found
     const post = await this.postsService.findOne(postId);
+    if (!post) {
+      throw new HttpException(
+        'Bad Request, post not found',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     // TODO: add try catch & check not found
     const newComment = new Comment();
     newComment.user = user;
