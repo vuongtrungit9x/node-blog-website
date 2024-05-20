@@ -6,6 +6,8 @@ import {
   Get,
   Param,
   Body,
+  ParseIntPipe,
+  HttpStatus,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { Category } from './category.entity';
@@ -27,19 +29,35 @@ export class CategoriesController {
 
   @Put(':id')
   update(
-    @Param('id') id: string,
+    @Param(
+      'id',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
     return this.categoriesService.update(Number(id), updateCategoryDto);
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string): Promise<void> {
+  delete(
+    @Param(
+      'id',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id: string,
+  ): Promise<void> {
     return this.categoriesService.delete(Number(id));
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Category> {
+  findOne(
+    @Param(
+      'id',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id: string,
+  ): Promise<Category> {
     return this.categoriesService.findOne(Number(id));
   }
 

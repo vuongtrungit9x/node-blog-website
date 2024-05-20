@@ -6,8 +6,6 @@ import { UsersModule } from './users/users.module';
 import { CategoriesModule } from './categories/categories.module';
 import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
-import { TagsModule } from './tags/tags.module';
-import { PostTagsModule } from './post-tags/post-tags.module';
 import { LoggerMiddleware } from './logger.middleware';
 
 @Module({
@@ -26,8 +24,6 @@ import { LoggerMiddleware } from './logger.middleware';
     CategoriesModule,
     PostsModule,
     CommentsModule,
-    TagsModule,
-    PostTagsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

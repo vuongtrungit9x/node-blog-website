@@ -9,6 +9,7 @@ import {
   UseFilters,
   HttpException,
   HttpStatus,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { UsersService } from '../users/users.service';
@@ -59,19 +60,35 @@ export class CommentsController {
 
   @Put(':id')
   update(
-    @Param('id') id: string,
+    @Param(
+      'id',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id: string,
     @Body() updatePostDto: Partial<Comment>,
   ): Promise<Comment> {
     return this.commentsService.update(Number(id), updatePostDto);
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string): Promise<void> {
+  delete(
+    @Param(
+      'id',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id: string,
+  ): Promise<void> {
     return this.commentsService.remove(Number(id));
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Comment> {
+  findOne(
+    @Param(
+      'id',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id: string,
+  ): Promise<Comment> {
     return this.commentsService.findOne(Number(id));
   }
 
