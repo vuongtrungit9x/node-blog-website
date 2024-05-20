@@ -19,7 +19,10 @@ export class CommentsService {
   }
 
   findOne(id: number): Promise<Comment> {
-    return this.commentsRepository.findOneBy({ id });
+    return this.commentsRepository.findOne({
+      where: { id: id },
+      relations: ['user', 'post'],
+    });
   }
 
   async remove(id: number): Promise<void> {

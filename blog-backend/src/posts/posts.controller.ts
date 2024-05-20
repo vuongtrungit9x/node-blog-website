@@ -49,14 +49,15 @@ export class PostsController {
   }
 
   @Get(':id')
-  findOne(
+  async findOne(
     @Param(
       'id',
       new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
     )
     id: string,
   ): Promise<PostEntity> {
-    return this.postsService.findOne(Number(id));
+    const post = await this.postsService.findOne(Number(id));
+    return post;
   }
 
   @Get()

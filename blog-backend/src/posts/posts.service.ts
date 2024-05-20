@@ -19,7 +19,10 @@ export class PostsService {
   }
 
   findOne(id: number): Promise<PostEntity> {
-    return this.postsRepository.findOneBy({ id });
+    return this.postsRepository.findOne({
+      where: { id: id },
+      relations: ['user', 'category'],
+    });
   }
 
   async remove(id: number): Promise<void> {
