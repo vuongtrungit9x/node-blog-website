@@ -10,17 +10,21 @@ import {
   HttpException,
   HttpStatus,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { UsersService } from '../users/users.service';
 import { PostsService } from '../posts/posts.service';
 import { Comment } from './comment.entity';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { HttpExceptionFilter } from 'src/http-exception.filter';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @ApiTags('comments')
 @Controller('comments')
+@UseGuards(AuthGuard)
+@ApiBearerAuth('bearer')
 export class CommentsController {
   constructor(
     private readonly commentsService: CommentsService,

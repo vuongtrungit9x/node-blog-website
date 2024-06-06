@@ -11,10 +11,14 @@ import {
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostEntity } from './post.entity';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @ApiTags('posts')
 @Controller('posts')
+@UseGuards(AuthGuard)
+@ApiBearerAuth('bearer')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 

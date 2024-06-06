@@ -12,7 +12,7 @@ import {
   Request,
   HttpCode,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { UsersService } from './users.service';
 import { AuthService } from '../auth/auth.service';
@@ -40,12 +40,12 @@ export class UsersController {
     return this.authService.login(signInDto.username, signInDto.password);
   }
 
-  @UseGuards(AuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
   }
 
+  @Public()
   @Post()
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     // Hash the password using bcrypt with increased salt rounds
@@ -68,6 +68,8 @@ export class UsersController {
   }
 
   @Put(':id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('bearer')
   update(
     @Param(
       'id',
@@ -80,6 +82,8 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('bearer')
   delete(
     @Param(
       'id',
@@ -91,6 +95,8 @@ export class UsersController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('bearer')
   findOne(
     @Param(
       'id',
@@ -102,6 +108,8 @@ export class UsersController {
   }
 
   @Get()
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('bearer')
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
