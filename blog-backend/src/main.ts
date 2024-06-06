@@ -27,6 +27,7 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document, {
     swaggerOptions: {
       security: [{ bearer: [] }],
+      persistAuthorization: true,
     },
   });
   app.useGlobalFilters(new HttpExceptionFilter());
