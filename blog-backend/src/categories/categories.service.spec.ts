@@ -1,53 +1,102 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CategoriesService } from './categories.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Category } from './category.entity';
 
 describe('CategoriesService', () => {
   let service: CategoriesService;
+  let repository: Repository<Category>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CategoriesService],
+      providers: [
+        CategoriesService,
+        {
+          provide: getRepositoryToken(Category),
+          useClass: Repository,
+        },
+      ],
     }).compile();
 
     service = module.get<CategoriesService>(CategoriesService);
+    repository = module.get<Repository<Category>>(getRepositoryToken(Category));
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  describe('create', () => {
+    it('should create a new category', async () => {
+      const createCategoryDto = { name: 'Test Category' };
+
+      const expectedResult = { id: 1, name: 'Test Category' };
+
+      jest.spyOn(repository, 'save').mockResolvedValue(expectedResult);
+
+      const result = await service.create(createCategoryDto);
+
+      expect(result).toEqual(expectedResult);
+      expect(repository.save).toHaveBeenCalledWith(createCategoryDto);
+    });
   });
 
-  it('should create a category', async () => {
-    const createCategoryDto = { name: 'Test Category' };
-    const createdCategory = await service.create(createCategoryDto);
-    expect(createdCategory).toBeDefined();
-    expect(createdCategory.name).toEqual(createCategoryDto.name);
+  describe('update', () => {
+    it('should update an existing category', async () => {
+      const id = 1;
+      const updateCategoryDto = { name: 'Updated Category' };
+
+      const existingCategory = { id: 1, name: 'Test Category' };
+      jest.spyOn(repository, 'findOneBy').mockResolvedValue(existingCategory);
+      jest
+        .spyOn(repository, 'save')
+        .mockResolvedValue({ ...existingCategory, ...updateCategoryDto });
+
+      const result = await service.update(id, updateCategoryDto);
+
+      expect(result).toEqual({ ...existingCategory, ...updateCategoryDto });
+      expect(repository.findOneBy).toHaveBeenCalledWith({ id });
+      expect(repository.save).toHaveBeenCalledWith({
+        ...existingCategory,
+        ...updateCategoryDto,
+      });
+    });
   });
 
-  it('should update a category', async () => {
-    const categoryId = 1;
-    const updateCategoryDto = { name: 'Updated Category' };
-    const updatedCategory = await service.update(categoryId, updateCategoryDto);
-    expect(updatedCategory).toBeDefined();
-    expect(updatedCategory.name).toEqual(updateCategoryDto.name);
+  describe('delete', () => {
+    it('should delete an existing category', async () => {
+      const id = 1;
+
+      jest.spyOn(repository, 'delete').mockResolvedValue(undefined);
+
+      await service.delete(id);
+
+      expect(repository.delete).toHaveBeenCalledWith(id);
+    });
   });
 
-  it('should delete a category', async () => {
-    const categoryId = 1;
-    await service.delete(categoryId);
-    const deletedCategory = await service.findOne(categoryId);
-    expect(deletedCategory).toBeUndefined();
+  describe('findOne', () => {
+    it('should find a category by id', async () => {
+      const id = 1;
+      const expectedResult = { id: 1, name: 'Test Category' };
+      jest.spyOn(repository, 'findOneBy').mockResolvedValue(expectedResult);
+
+      const result = await service.findOne(id);
+
+      expect(result).toEqual(expectedResult);
+      expect(repository.findOneBy).toHaveBeenCalledWith({ id });
+    });
   });
 
-  it('should find a category by id', async () => {
-    const categoryId = 1;
-    const foundCategory = await service.findOne(categoryId);
-    expect(foundCategory).toBeDefined();
-    expect(foundCategory.id).toEqual(categoryId);
-  });
+  describe('findAll', () => {
+    it('should find all categories', async () => {
+      const expectedResult = [
+        { id: 1, name: 'Test Category 1' },
+        { id: 2, name: 'Test Category 2' },
+      ];
+      jest.spyOn(repository, 'find').mockResolvedValue(expectedResult);
 
-  it('should find all categories', async () => {
-    const categories = await service.findAll();
-    expect(categories).toBeDefined();
-    expect(categories.length).toBeGreaterThan(0);
+      const result = await service.findAll();
+
+      expect(result).toEqual(expectedResult);
+      expect(repository.find).toHaveBeenCalled();
+    });
   });
 });
