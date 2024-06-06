@@ -1,54 +1,102 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CategoriesController } from './categories.controller';
-
+import { CategoriesService } from './categories.service';
+import { Category } from './category.entity';
 describe('CategoriesController', () => {
   let controller: CategoriesController;
+  let service: CategoriesService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CategoriesController],
+      providers: [
+        {
+          provide: CategoriesService,
+          useValue: {
+            findAll: jest.fn().mockResolvedValue([]),
+            create: jest.fn().mockImplementation((createCategoryDto) => {
+              return Promise.resolve({
+                id: 1,
+                ...createCategoryDto,
+              });
+            }),
+            update: jest.fn().mockImplementation((id, updateCategoryDto) => {
+              return Promise.resolve({
+                id,
+                ...updateCategoryDto,
+              });
+            }),
+            delete: jest.fn().mockResolvedValue(undefined),
+            findOne: jest.fn().mockImplementation((id) => {
+              return Promise.resolve({
+                id,
+                name: 'Category',
+              });
+            }),
+          },
+        },
+      ],
     }).compile();
 
     controller = module.get<CategoriesController>(CategoriesController);
+    service = module.get<CategoriesService>(CategoriesService);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should create a category', async () => {
-    const createCategoryDto = { name: 'Test Category' };
-    const createdCategory = await controller.create(createCategoryDto);
-    expect(createdCategory).toBeDefined();
-    expect(createdCategory.name).toEqual(createCategoryDto.name);
+  describe('findAll', () => {
+    it('should return an array of categories', async () => {
+      const result = [];
+      jest.spyOn(service, 'findAll').mockResolvedValue(result);
+      expect(await controller.findAll()).toBe(result);
+    });
   });
 
-  it('should update a category', async () => {
-    const categoryId = '1';
-    const updateCategoryDto = { name: 'Updated Category' };
-    const updatedCategory = await controller.update(
-      categoryId,
-      updateCategoryDto,
-    );
-    expect(updatedCategory).toBeDefined();
-    expect(updatedCategory.name).toEqual(updateCategoryDto.name);
+  describe('create', () => {
+    it('should create a new category', async () => {
+      const createCategoryDto = { name: 'New Category' };
+      const result: Category = {
+        id: 1,
+        name: 'New Category',
+      };
+      expect(await controller.create(createCategoryDto)).toEqual(result);
+      expect(service.create).toHaveBeenCalledWith(createCategoryDto);
+    });
   });
 
-  it('should delete a category', async () => {
-    const categoryId = '1';
-    await expect(controller.delete(categoryId)).resolves.toBeUndefined();
+  describe('update', () => {
+    it('should update a category', async () => {
+      const id = '1';
+      const updateCategoryDto = { name: 'Updated Category' };
+      const result: Category = {
+        id: 1,
+        name: 'Updated Category',
+      };
+      expect(await controller.update(id, updateCategoryDto)).toEqual(result);
+      expect(service.update).toHaveBeenCalledWith(result.id, updateCategoryDto);
+    });
   });
 
-  it('should find a category by ID', async () => {
-    const categoryId = '1';
-    const foundCategory = await controller.findOne(categoryId);
-    expect(foundCategory).toBeDefined();
-    expect(foundCategory.id).toEqual(categoryId);
+  describe('delete', () => {
+    it('should delete a category', async () => {
+      const id = '1';
+      const idExpected = 1;
+      await controller.delete(id);
+      expect(service.delete).toHaveBeenCalledWith(idExpected);
+    });
   });
 
-  it('should find all categories', async () => {
-    const categories = await controller.findAll();
-    expect(categories).toBeDefined();
-    expect(categories.length).toBeGreaterThan(0);
+  describe('findOne', () => {
+    it('should find a category by id', async () => {
+      const id = '1';
+      const result: Category = {
+        id: 1,
+        name: 'Category',
+      };
+      expect(await controller.findOne(id)).toEqual(result);
+      expect(service.findOne).toHaveBeenCalledWith(result.id);
+    });
   });
 });
